@@ -1,10 +1,3 @@
-//
-//  Digest+StringOutput.swift
-//  FingerprintJS
-//
-//  Created by Petr Palata on 10.03.2022.
-//
-
 import CryptoKit
 import Foundation
 
@@ -14,6 +7,6 @@ extension Digest {
     var data: Data { Data(bytes) }
 
     var hexStr: String {
-        bytes.map { String(format: "%02x", $0) }.joined()
+        bytes.map { .init(format: "%02x", $0) }.joined()
     }
 }

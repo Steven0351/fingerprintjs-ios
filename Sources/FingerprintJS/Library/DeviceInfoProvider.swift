@@ -14,7 +14,37 @@ public class DeviceInfoProvider {
     private let appInfoHarvester: AppInfoHarvesting
     private let hardwareInfoHarvester: HardwareInfoHarvesting
     private let osInfoHarvester: OSInfoHarvesting
+    #if os(iOS)
+    private let cellularNetworkInfoHarvester: CellularNetworkInfoHarvesting
+    private let localAuthenticationInfoHarvester: LocalAuthenticationInfoHarvesting
 
+    public convenience init() {
+        self.init(
+            identifierHarvester: IdentifierHarvester(),
+            appInfoHarvester: AppInfoHarvester(),
+            hardwareInfoHarvester: HardwareInfoHarvester(),
+            osInfoHarvester: OSInfoHarvester(),
+            cellularNetworkInfoHarvester: CellularNetworkInfoHarvester(),
+            localAuthenticationInfoHarvester: LocalAuthenticationInfoHarvester()
+        )
+    }
+
+    init(
+        identifierHarvester: IdentifierHarvesting,
+        appInfoHarvester: AppInfoHarvesting,
+        hardwareInfoHarvester: HardwareInfoHarvesting,
+        osInfoHarvester: OSInfoHarvesting,
+        cellularNetworkInfoHarvester: CellularNetworkInfoHarvesting,
+        localAuthenticationInfoHarvester: LocalAuthenticationInfoHarvesting
+    ) {
+        self.identifierHarvester = identifierHarvester
+        self.appInfoHarvester = appInfoHarvester
+        self.hardwareInfoHarvester = hardwareInfoHarvester
+        self.osInfoHarvester = osInfoHarvester
+        self.cellularNetworkInfoHarvester = cellularNetworkInfoHarvester
+        self.localAuthenticationInfoHarvester = localAuthenticationInfoHarvester
+    }
+    #else
     public convenience init() {
         self.init(
             identifierHarvester: IdentifierHarvester(),
@@ -35,6 +65,7 @@ public class DeviceInfoProvider {
         self.hardwareInfoHarvester = hardwareInfoHarvester
         self.osInfoHarvester = osInfoHarvester
     }
+    #endif
 }
 
 extension DeviceInfoProvider: DeviceInfoProviding {
@@ -49,23 +80,63 @@ extension DeviceInfoProvider: DeviceInfoProviding {
     }
 
     public func getDeviceInfo(_ completion: @escaping (DeviceInfo) -> Void) {
-        let deviceInfo = DeviceInfo(
+        completion(deviceInfo)
+    }
+
+    #if os(iOS)
+    private var deviceInfo: DeviceInfo {
+        .init(
             vendorIdentifier: identifierHarvester.vendorIdentifier,
+            localeIdentifier: appInfoHarvester.localeIdentifier,
             userInterfaceStyle: appInfoHarvester.userInterfaceStyle,
-            diskSpace: hardwareInfoHarvester.diskSpaceInfo,
             screenResolution: hardwareInfoHarvester.displayResolution,
+            screenScale: hardwareInfoHarvester.displayScale,
+            deviceName: hardwareInfoHarvester.deviceName,
             deviceType: hardwareInfoHarvester.deviceType,
             deviceModel: hardwareInfoHarvester.deviceModel,
             memorySize: hardwareInfoHarvester.memorySize,
             physicalMemory: hardwareInfoHarvester.memorySize,
             cpuCount: hardwareInfoHarvester.cpuCount,
+            kernelHostname: hardwareInfoHarvester.kernelHostname,
+            osTimeZoneIdentifier: osInfoHarvester.osTimeZoneIdentifier,
             osBuild: osInfoHarvester.osBuild,
             osVersion: osInfoHarvester.osVersion,
             osType: osInfoHarvester.osType,
             osRelease: osInfoHarvester.osRelease,
-            kernelVersion: osInfoHarvester.kernelVersion
+            kernelVersion: osInfoHarvester.kernelVersion,
+            bootTime: osInfoHarvester.bootTime,
+            mobileCountryCodes: cellularNetworkInfoHarvester.mobileCountryCodes,
+            mobileNetworkCodes: cellularNetworkInfoHarvester.mobileNetworkCodes,
+            localAuthentication: .init(
+                isPasscodeEnabled: localAuthenticationInfoHarvester.isPasscodeEnabled,
+                isBiometricsEnabled: localAuthenticationInfoHarvester.isBiometricsEnabled,
+                biometryType: localAuthenticationInfoHarvester.biometryType
+            )
         )
-
-        completion(deviceInfo)
     }
+    #else
+    private var deviceInfo: DeviceInfo {
+        .init(
+            vendorIdentifier: identifierHarvester.vendorIdentifier,
+            localeIdentifier: appInfoHarvester.localeIdentifier,
+            userInterfaceStyle: appInfoHarvester.userInterfaceStyle,
+            screenResolution: hardwareInfoHarvester.displayResolution,
+            screenScale: hardwareInfoHarvester.displayScale,
+            deviceName: hardwareInfoHarvester.deviceName,
+            deviceType: hardwareInfoHarvester.deviceType,
+            deviceModel: hardwareInfoHarvester.deviceModel,
+            memorySize: hardwareInfoHarvester.memorySize,
+            physicalMemory: hardwareInfoHarvester.memorySize,
+            cpuCount: hardwareInfoHarvester.cpuCount,
+            kernelHostname: hardwareInfoHarvester.kernelHostname,
+            osTimeZoneIdentifier: osInfoHarvester.osTimeZoneIdentifier,
+            osBuild: osInfoHarvester.osBuild,
+            osVersion: osInfoHarvester.osVersion,
+            osType: osInfoHarvester.osType,
+            osRelease: osInfoHarvester.osRelease,
+            kernelVersion: osInfoHarvester.kernelVersion,
+            bootTime: osInfoHarvester.bootTime
+        )
+    }
+    #endif
 }

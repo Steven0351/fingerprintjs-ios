@@ -2,12 +2,17 @@ struct CompoundTreeBuilder {
     private let providers: [DeviceInfoTreeProvider]
 
     init() {
-        self.init(providers: [
+        var providers: [DeviceInfoTreeProvider] = [
             AppInfoHarvester(),
             HardwareInfoHarvester(),
             OSInfoHarvester(),
             IdentifierHarvester(),
-        ])
+        ]
+        #if os(iOS)
+        providers.append(CellularNetworkInfoHarvester())
+        providers.append(LocalAuthenticationInfoHarvester())
+        #endif
+        self.init(providers: providers)
     }
 
     init(providers: [DeviceInfoTreeProvider]) {
@@ -26,7 +31,7 @@ extension CompoundTreeBuilder: DeviceInfoTreeProvider {
         )
     }
 
-    var versionedItems: [VersionedInfoItem] {
+    var annotatedItems: [AnnotatedInfoItem] {
         return []
     }
 }

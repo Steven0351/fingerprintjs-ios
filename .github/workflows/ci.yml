@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '.gitignore'
+      - 'LICENSE'
+      - 'README.md'
+      - 'resources/**'
+  pull_request:
+    paths-ignore:
+      - '.gitignore'
+      - 'LICENSE'
+      - 'README.md'
+      - 'resources/**'
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: macos-14
+    env:
+      DEVELOPER_DIR: "/Applications/Xcode_16.1.app/Contents/Developer"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install swift-format
+        run: brew install swift-format
+
+      - name: Lint Code
+        run: make lint
+
+  tests:
+    name: Tests (Xcode ${{ matrix.xcode }})
+    needs: [lint]
+    runs-on: macos-${{ matrix.macos }}
+    env:
+      DEVELOPER_DIR: "/Applications/Xcode_${{ matrix.xcode }}.app/Contents/Developer"
+    strategy:
+      matrix:
+        include:
+          - macos: 13
+            xcode: '14.1'    # Swift 5.7
+            ios-simulator: 'iPhone 14 Pro'
+          - macos: 13
+            xcode: '14.3.1'  # Swift 5.8
+            ios-simulator: 'iPhone 14 Pro'
+          - macos: 14
+            xcode: '15.0'    # Swift 5.9
+            ios-simulator: 'iPhone 15 Pro'
+          - macos: 14
+            xcode: '15.3'    # Swift 5.10
+            ios-simulator: 'iPhone 15 Pro'
+          - macos: 14
+            xcode: '16.1'    # Swift 6.0
+            ios-simulator: 'iPhone 16 Pro'
+
+    steps:
+      - name: Runner Overview
+        run: system_profiler SPHardwareDataType SPSoftwareDataType SPDeveloperToolsDataType
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Tests
+        run: make tests OPTIONS="--ios-platform 'iOS Simulator,name=${{ matrix.ios-simulator }}'"

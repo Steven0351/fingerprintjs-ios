@@ -1,0 +1,34 @@
+{
+  "configurations" : [
+    {
+      "id" : "F19A8419-92E7-4763-8138-1DDF67131064",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : {
+      "targets" : [
+        {
+          "containerPath" : "container:FingerprintJS.xcodeproj",
+          "identifier" : "6A2047F22971ACFA008EC677",
+          "name" : "SystemControl"
+        }
+      ]
+    },
+    "testExecutionOrdering" : "random"
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:FingerprintJS.xcodeproj",
+        "identifier" : "6A0F5C81297898430068BD4D",
+        "name" : "SystemControlTests"
+      }
+    }
+  ],
+  "version" : 1
+}

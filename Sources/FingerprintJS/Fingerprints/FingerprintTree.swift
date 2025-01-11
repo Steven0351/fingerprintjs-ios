@@ -1,10 +1,3 @@
-//
-//  FingerprintTree.swift
-//  FingerprintJS
-//
-//  Created by Petr Palata on 20.03.2022.
-//
-
 import Foundation
 
 /// Entity representing the entire tree/set of device information along with its computed fingerprints
@@ -18,6 +11,6 @@ public struct FingerprintTree {
 
     /// Computed fingerprint for the current node in its `String` form
     public var fingerprint: String {
-        return String.from(fingerprintData)
+        String(data: fingerprintData, encoding: .ascii) ?? "Undefined"
     }
 }
